@@ -57,7 +57,6 @@ Retrieves the content of the page which are then written into a `.csv` file whic
     Returns: 
     - None
 
-## Methods
 ### FileManager
 #### create_container
 - `create_container(container_name)`
