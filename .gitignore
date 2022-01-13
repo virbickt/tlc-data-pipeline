@@ -1,0 +1,6 @@
+/env
+/file_manager/__pycache__
+/database_manager/__pycache__
+/collector/__pycache__
+*.env
+.env
