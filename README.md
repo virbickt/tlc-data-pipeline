@@ -40,13 +40,12 @@ python app.py
 
 ## Methods
 ### Collector
-Application has no interface and is only suitable for sending the input values and receiving predictions in json format using either Python's in-built `requests` or, Postman.
-API consists in two routes:
 #### generate_urls
 - `generate_urls()`
 Generates a list of urls to collect the data from by iterating over the range of years that the `Collector` object has been inicialized with. If the number for the month consists in a single digit, it is appended with `0`.
 
-    Returns (List[str]): list that contains urls for each month's data in `.csv` format
+    Returns : 
+    - urls(List[str]): the list that contains urls for each month's data in `.csv` format
 #### extract_data
 - `extract_data(url, filename)`
 Retrieves the content of the page which are then written into a `.csv` file which is saved by the name specified as `filename`.
@@ -55,7 +54,170 @@ Retrieves the content of the page which are then written into a `.csv` file whic
     - url(str): the url to retrieve the content from and write into a .csv file.
     - file_name(str): the name which is to be used to save the file with.
 
-    Returns: None
+    Returns: 
+    - None
+
+## Methods
+### FileManager
+#### create_container
+- `create_container(container_name)`
+Creates a new container inside Azure Storage. 
+
+    Parameters:
+    - container_name(str): the name for the container to be created. Default value: "tlc-data-demo"
+
+    Returns: 
+    - None
+#### upload_file
+- `upload_file(container_name, file_name)`
+Uploads the file to Azure Storage as a blob. Blobs, as they are referred to in Azure documentation, are Azure-specific objects that can hold text or binary data, including images, documents, etc.
+
+    Parameters:
+    - container_name(str): the name of a container created prior to uploading the file. Default value: "tlc-data-demo"
+    - file_name(str): the name for the file (blob). This is the name that the file is going to be stored with in your storage account.
+
+    Returns: 
+    - None
+
+### Database
+#### create_container
+- `get_clients()`
+Authenticates the service principal to get the clients required to create server and database.
+
+    Parameters:
+    - None
+
+    Returns: 
+    - resource_client(ResourceManagementClient):
+    - sql_client(SqlManagementClient):
+#### create_resource_group
+- `create_resource_group(group_name, region)`
+Creates a new resource group.
+
+    Parameters:
+    - group_name(str): the name for the new resource group that is to be created.
+    - region(str): region to which the new resource group is going to be assigned to. To list all the available regions in the accessible format, use `az account list-locations -o table` when using a terminal with Azure CLI installed.
+    - administrator_login(str): the username for logging into the server as an administrator.
+    - administrator_login_password(str): the password for logging into the server as an administrator.
+
+    Returns: 
+    - None
+#### create_server
+- `create_server()`
+Creates a new server. If you intend to use the methods in isolation, be aware that a server must be created prior to creating a database.
+
+    Parameters:
+    - server_name(str): the name for the server
+    - group_name(str): the name for the new resource group which has been created prior to creating a server.
+    - region(str): region to which the new server is going to be assigned to. To list all the available regions in the accessible format, use `az account list-locations -o table` when using a terminal with Azure CLI installed.
+    - administrator_login(str): the username for logging into the server as an administrator.
+    - administrator_login_password(str): the password for logging into the server as an administrator.
+    - 
+
+    Returns: 
+    - None
+#### create_database
+- `create_database()`
+Creates a new SQL database.
+
+    Parameters:
+    - group_name(str): the name for the new resource group that the database to be created will belong to.
+    - server_name(str): the name of the server that will host the database to be created. The server has to be created prior to creating a database.
+    - database_name(str): the name for the database to be created.
+    - region(str): region to which the new database is going to be assigned to. To list all the available regions in the accessible format, use `az account list-locations -o table` when using a terminal with Azure CLI installed. 
+    - collation(str): type of collation to be used. Collations determine sorting rules as well as case/accent sensitivity for the data which means that the results of the exactly same query might differ when it is on databases with different collations. For the types of collations available, please refer to the [official docs](https://docs.microsoft.com/en-us/sql/relational-databases/collations/collation-and-unicode-support?view=sql-server-ver15).
+    - pricing_tier(str): the pricing tier for the database to be created. Pricing tier determines fixed amount of compute resource that is to be allocated to the database for a fixed price billed hourly.
+
+    Returns: 
+    - None
+#### whitelist_ip
+- `whitelist_ip()`
+Add the given IP adress to the list of IP adressess that have access to the database. While the indended use case is adding a single IP address, it is originally intended to whitelist a range of IP adresses. This is useful for cases when IP adress change as it would still fall inside the range of the whitelisted IP addresses.
+
+    Parameters:
+    - rule_name(str): the name for the firewall rule to be created.
+    - group_name(str): the name for the new resource group that the server and database (both preferrably) belongs to.
+    - server_name(str): the name of the server that the access is to be granted to.
+    - ip_address(str): the IP address to grant the access to the database.
+
+    Returns: 
+    - None
+#### encrypt_database
+- `encrypt_database()`
+Encrypt the database.
+
+    Parameters:
+    - server_name(str): the name of the server that hosts the database to be encrypted.
+    - database_name(str): the name of the database that is to be encrypted.
+    - login_username(str): the login username for the database which was set when creating the server to host the database.
+    - login_password(str): the password for the database which was set when creating the server to host the database.
+    - encryption_password(str): the password used for the encryption of the database.
+    - driver(int): ODBC driver version. The default version is ODBC Driver 17 for SQL Server.
+
+    Returns: 
+    - None
+#### create_credentials
+- `create_credentials()`
+Create the credentials which will be used to load the .csv files to the database from the storage account.
+
+    Parameters:
+    - credential_name(str): the name for the credential to be used to load the resources to the database from the storage account.
+    - server_name(str): the name of the server hosting the database.
+    - database_name(str): the name of the database that will be used to store the resources loaded from the storage account.
+    - login_username(str): the login username for the database which was set when creating the server to host the database.
+    - login_password(str): the password for the database which was set when creating the server to host the database.
+    - sas_token(str): shared access signature (SAS) which is required to be generated using Azure Platform prior to executing the function.
+    - driver(int): ODBC driver version. The default version is ODBC Driver 17 for SQL Server. 
+
+    Returns: 
+    - None
+#### create_external_data_source
+- `create_external_data_source()`
+Creates an external data source.
+
+    Parameters:
+    - datasource_name(str): custom name for the external datasource which is to be used to upload data to the database.
+    - credential_name(str): the name for the credential which will be used to create the external data source. Must be created prior to creating the external data source.
+    - location(str): the name of the storage which is required to be created prior to executing the function.
+    - container_name(str): the name of the container which is to be established as an external data source.
+    - server_name(str): the name of the server hosting the database.
+    - database_name(str): the name of the database that will be used to store the resources loaded from the storage account.
+    - login_username(str): the login username for the database which was set when creating the server to host the database.
+    - login_password(str): the password for the database which was set when creating the server to host the database.
+    - driver(int): ODBC driver version. The default version is ODBC Driver 17 for SQL Server. 
+
+    Returns: 
+    - None
+#### create_table
+- `create_table()`
+Creates a new table. Note that the schema provided is tailored specifically for NYC Taxi and Limousine Commission data.
+
+    Parameters:
+    - server_name(str): the name of the server that hosts the database.
+    - database_name(str): the name of the database where the table is going to be created.
+    - login_username(str): the login username for the database which was set when creating the server to host the database.
+    - login_password(str): the password for the database which was set when creating the server to host the database.
+    - driver(int): ODBC driver version. The default version is ODBC Driver 17 for SQL Server.
+    - table_name(str): the name for the table to be created.
+
+    Returns: 
+    - None
+#### load_csv_to_db
+- `load_csv_to_db()`
+Loads the .csv files taken from the storage and inserts the data to the table which is to be created prior to loading the data. 
+
+    Parameters:
+    - server_name(str): the name of the server that hosts the database.
+    - database_name(str): the name of the database with the table.
+    - login_username(str): the login username for the database which was set when creating the server to host the database.
+    - login_password(str): the password for the database which was set when creating the server to host the database.
+    - driver(int): ODBC driver version. The default version is ODBC Driver 17 for SQL Server.
+    - table_name(str): the name for the table where the data is going to inserted.
+    - file_name(str): the name of the blob inside the storage which is where the data is going to be taken from.
+
+    Returns: 
+    - None
+
 
 
 ## Technologies:
