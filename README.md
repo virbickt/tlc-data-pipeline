@@ -13,7 +13,7 @@ This is an automated solution to collect [TLC Trip Record data](https://www1.nyc
 In order for the script to be used without any problems, you need to have at least [Python 3.9](https://www.python.org/downloads/) installed. Additionally, [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) needs to be installed as the script executes CLI commands to whitelist your IP address which is for the storage account and database to be connected and the data to eventually be stored in in the database.
 
 ## Installation
-The installation guide assumes that you're using Windows and have (GitBash)[https://git-scm.com/downloads] installed.  
+The installation guide assumes that you're using Windows and have [GitBash](https://git-scm.com/downloads) installed.  
 
 1. Clone the repository using the terminal. Inside the terminal, run 
 ```
